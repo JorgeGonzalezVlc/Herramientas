@@ -4,23 +4,17 @@ Repositorio con diferentes herramientas diseñadas para automatizar tareas y hac
 
 Siéntete libre de descargar, modificar o sugerir mejoras que puedan ser útiles para todos.
 
+Las sugerencias y mejoras son siempre bienvenidas.
+
 ## Contenido
 
-### 📄 Lector de actas
-Herramienta en Python para procesar y analizar actas de forma automatizada.
+### 📄 Comparador de actas, Herramienta en Python para procesar y analizar actas de forma automatizada.
 
-📂 `lector-actas/`
 
----
+### 🧹 Limpieza de copias de seguridad, Scripts en **PowerShell** y **Bash** para eliminar copias de seguridad antiguas de forma recursiva según criterios de fecha.
 
-### 🧹 Limpieza de copias de seguridad
-Scripts en **PowerShell** y **Bash** para eliminar copias de seguridad antiguas de forma recursiva según criterios de fecha.
 
-📂 `backup-cleaner/`
 
----
 
-## Contribuciones
 
-Las sugerencias y mejoras son siempre bienvenidas.
 
