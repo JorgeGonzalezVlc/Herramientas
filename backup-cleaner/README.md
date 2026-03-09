@@ -6,8 +6,8 @@ La herramienta recorre una ruta de forma recursiva y elimina elementos que cumpl
 
 ## Versiones disponibles
 
-- **PowerShell** → `powershell/Clean-OldBackups.ps1`
-- **Bash** → `bash/clean-old-backups.sh`
+- **PowerShell** → `backup_cleaner_windows.ps1`
+- **Bash** → `backup_cleaner_linux.sh`
 
 ## Uso típico
 
