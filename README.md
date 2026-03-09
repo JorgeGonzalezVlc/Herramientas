@@ -8,8 +8,8 @@ Las sugerencias y mejoras son siempre bienvenidas.
 
 ## Contenido
 
-- 📄 Comparador de actas, Herramienta en Python para procesar y analizar actas de forma automatizada.
-- 🧹 Limpieza de copias de seguridad, Scripts en **PowerShell** y **Bash** para eliminar copias de seguridad antiguas de forma recursiva según criterios de fecha.
+- 📄 **Comparador de actas**, *Herramienta en Python para procesar y analizar actas de forma automatizada.*
+- 🧹 **Limpieza de copias de seguridad**, *Scripts en PowerShell y Bash para eliminar copias de seguridad antiguas de forma recursiva según criterios de fecha.*
 
 
 
