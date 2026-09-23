@@ -1,0 +1,109 @@
+#!/usr/bin/env bash
+
+set -uo pipefail
+RESET=$'\033[0m'; BOLD=$'\033[1m'
+info() { echo -e "$*"; }
+good() { echo -e "$*"; }
+# ---------- ayuda ----------
+
+show_help() {
+    cat <<AYUDA
+${BOLD}nmap automatizado${RESET}
+
+Automatiza el flujo tipico de reconocimiento con nmap en dos fases:
+  1) Descubrimiento rapido de TODOS los puertos TCP abiertos
+  2) Escaneo detallado sobre los puertos que aparecieron abiertos en la fase 1
+  3) Puedes añadir un escaneo UDP con flag
+
+${BOLD}Uso:${RESET}
+  nmapx <IP_o_host> [udp]
+  nmapx -h | --help
+
+${BOLD}Ejemplos:${RESET}
+  nmapx 10.129.245.103
+  nmapx 10.129.245.103 udp
+  nmapx prueba.com
+
+${BOLD}Salida:${RESET}
+  Crea una carpeta nmapx_<target>_<fecha-hora>/ con:
+    01-discovery-tcp.txt
+    02-detailed-tcp.txt/.xml
+    03-discovery-udp.txt
+AYUDA
+}
+
+
+if [ "$#" -lt 1 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    show_help
+    if [ "$#" -lt 1 ]; then
+        exit 1
+    fi
+    exit 0
+fi
+
+
+TARGET="$1"
+DO_UDP="${2:-}"
+
+
+if ! command -v nmap >/dev/null 2>&1; then
+    error "nmap no esta instalado"
+    exit 1
+fi
+
+
+# ---------- carpeta de salida ----------
+TIMESTAMP=$(date +%Y_%m_%d)
+OUTDIR="nmapx_${TARGET}_${TIMESTAMP}"
+mkdir -p "$OUTDIR"
+
+info "Target: ${BOLD}${TARGET}${RESET}"
+info "Resultados en: ${BOLD}${OUTDIR}/${RESET}"
+echo
+
+
+# =========================================================
+# FASE 1 - Descubrimiento de puertos TCP abiertos
+# =========================================================
+
+info "Fase 1/2: descubrimiento de puertos TCP abiertos"
+sudo nmap -p- --min-rate 10000 -Pn --reason -oN "${OUTDIR}/01-discovery-tcp.txt" "$TARGET" \
+    > /dev/null 2>&1
+
+if [ ! -s "${OUTDIR}/01-discovery-tcp.txt" ]; then
+    error "El escaneo de descubrimiento no genero salida revisa permisos."
+    exit 1
+fi
+
+PORTS=$(grep -E '^[0-9]+/tcp\s+open' "${OUTDIR}/01-discovery-tcp.txt" | cut -d'/' -f1 | paste -sd, -)
+
+if [ -z "$PORTS" ]; then
+    warn "No se encontraron puertos TCP abiertos. Revisa ${OUTDIR}/01-discovery-tcp.txt"
+    exit 0
+fi
+
+good "Puertos TCP abiertos encontrados: ${BOLD}${PORTS}${RESET}"
+echo
+
+# =========================================================
+# FASE 2 - Escaneo detallado solo sobre esos puertos
+# =========================================================
+info "Fase 2/2: escaneo detallado (-sCV) sobre los puertos encontrados..."
+sudo nmap -p "$PORTS" -sCV -oN "${OUTDIR}/02-detailed-tcp.txt" -oX "${OUTDIR}/02-detailed-tcp.xml" "$TARGET" \
+    2>&1 | tee "${OUTDIR}/02-detailed-tcp.stdout.txt" | grep -v "^$"
+
+good "Escaneo detallado guardado en ${OUTDIR}/02-detailed-tcp.txt"
+echo
+
+# =========================================================
+# FASE OPCIONAL - UDP (top 100, requiere mas tiempo/privilegios)
+# =========================================================
+if [ "$DO_UDP" = "udp" ]; then
+    info "Escaneo UDP (top 100 puertos), esto puede tardar varios minutos"
+    sudo nmap -sU --top-ports 100 -oN "${OUTDIR}/03-discovery-udp.txt" "$TARGET" \
+        > /dev/null 2>&1
+    good "Escaneo UDP guardado en ${OUTDIR}/03-discovery-udp.txt"
+    echo
+fi
+
+good "Todo listo. Resultados completos en: ${OUTDIR}/"
